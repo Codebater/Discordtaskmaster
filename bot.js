@@ -35,10 +35,15 @@ client.on('interactionCreate', async (interaction) => {
       return;
     }
 
-    // Guild object can be null on cold start (race condition before cache populates).
-    // Fetching it ensures interaction.guild is available for all handlers.
+    // Guild object is null when the bot was invited without the 'bot' scope.
     if (!interaction.guild) {
-      await interaction.client.guilds.fetch(interaction.guildId);
+      if (interaction.isRepliable()) {
+        await interaction.reply({
+          content: '❌ Setup required: the bot must be re-invited with the **bot** scope and permissions. Ask a server admin to use the correct invite link.',
+          ephemeral: true,
+        });
+      }
+      return;
     }
 
     if (interaction.isChatInputCommand()) {
