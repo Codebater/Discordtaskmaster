@@ -27,6 +27,14 @@ client.once('ready', async () => {
 
 client.on('interactionCreate', async (interaction) => {
   try {
+    // All commands require a server — block DM usage to prevent guild null errors
+    if (!interaction.guildId) {
+      if (interaction.isRepliable()) {
+        await interaction.reply({ content: '❌ This bot only works inside a server, not in DMs.', ephemeral: true });
+      }
+      return;
+    }
+
     if (interaction.isChatInputCommand()) {
       const command = client.commands.get(interaction.commandName);
       if (command) await command.execute(interaction);

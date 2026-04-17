@@ -1,5 +1,5 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder,
-        EmbedBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        EmbedBuilder, ButtonBuilder, ButtonStyle, ChannelType } = require('discord.js');
 const taskManager = require('./taskManager');
 const { buildTaskListEmbed, buildDoneEmbed } = require('./embedBuilder');
 
@@ -94,14 +94,13 @@ const commands = {
       const guildData = taskManager.getGuildTasks(guildId);
       const settings = taskManager.getGuildSettings(guildId);
 
-      // Find or create #tasks channel
-      let tasksChannel = interaction.guild.channels.cache.find(
-        ch => ch.name === 'tasks' && ch.isTextBased()
-      );
+      // Fetch fresh channel list from API (cache may be empty on cold start)
+      const allChannels = await interaction.guild.channels.fetch();
+      let tasksChannel = allChannels.find(ch => ch && ch.name === 'tasks' && ch.isTextBased());
       if (!tasksChannel) {
         tasksChannel = await interaction.guild.channels.create({
           name: 'tasks',
-          type: 0,
+          type: ChannelType.GuildText,
           topic: '📋 Live task board — managed by TaskBot',
         });
       }

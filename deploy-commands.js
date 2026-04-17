@@ -3,12 +3,19 @@ const { REST, Routes, ApplicationCommandOptionType } = require('discord.js');
 async function deployCommands(client) {
   const commands = [
     {
+      name: 'setup',
+      description: '🔧 Create the #tasks channel and post the live task boards',
+      dm_permission: false,
+    },
+    {
       name: 'tasklist',
       description: '📋 Post the live task board in this channel',
+      dm_permission: false,
     },
     {
       name: 'addtask',
       description: '➕ Quickly add a new task',
+      dm_permission: false,
       options: [
         { name: 'title', description: 'Task title', type: ApplicationCommandOptionType.String, required: true },
         { name: 'description', description: 'Task description', type: ApplicationCommandOptionType.String, required: false },
@@ -20,11 +27,8 @@ async function deployCommands(client) {
     {
       name: 'settings',
       description: '⚙️ Configure timezone, working hours & reminders',
+      dm_permission: false,
     },
-    {
-      name: 'setup',
-      description: '🔧 Create the #tasks channel and post the live task boards',
-    }
   ];
 
   const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
