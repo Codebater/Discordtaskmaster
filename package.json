@@ -1,0 +1,20 @@
+{
+  "name": "discord-taskbot",
+  "version": "1.0.0",
+  "description": "A Discord task management bot with reminders, deadlines, and a live task board",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
