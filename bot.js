@@ -38,12 +38,12 @@ client.on('interactionCreate', async (interaction) => {
       await handleSelect(interaction);
     }
   } catch (err) {
-    console.error(err);
-    const reply = { content: '❌ An error occurred.', ephemeral: true };
+    console.error('[interaction error]', interaction.commandName || interaction.customId, err);
+    const reply = { content: `❌ An error occurred: ${err.message}`, ephemeral: true };
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(reply);
+      await interaction.followUp(reply).catch(() => {});
     } else {
-      await interaction.reply(reply);
+      await interaction.reply(reply).catch(() => {});
     }
   }
 });
@@ -53,6 +53,8 @@ async function handleButton(interaction) {
   const handlers = require('./buttonHandlers');
   if (handlers[action]) {
     await handlers[action](interaction, params);
+  } else {
+    await interaction.reply({ content: '❌ Unknown button action.', ephemeral: true });
   }
 }
 
@@ -61,6 +63,8 @@ async function handleModal(interaction) {
   const handlers = require('./modalHandlers');
   if (handlers[action]) {
     await handlers[action](interaction, params);
+  } else {
+    await interaction.reply({ content: '❌ Unknown form submission.', ephemeral: true });
   }
 }
 
@@ -69,6 +73,8 @@ async function handleSelect(interaction) {
   const handlers = require('./selectHandlers');
   if (handlers[action]) {
     await handlers[action](interaction, params);
+  } else {
+    await interaction.reply({ content: '❌ Unknown select action.', ephemeral: true });
   }
 }
 

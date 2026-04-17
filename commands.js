@@ -60,6 +60,7 @@ const commands = {
       ]
     },
     async execute(interaction) {
+      await interaction.deferReply({ ephemeral: true });
       const title = interaction.options.getString('title');
       const description = interaction.options.getString('description') || '';
       const assigneeStr = interaction.options.getString('assignees') || '';
@@ -77,7 +78,64 @@ const commands = {
       taskManager.addTask(guildId, { title, description, assignees, deadline, reminder });
       await updateListMessage(interaction.guild);
 
-      await interaction.reply({ content: `✅ Task **"${title}"** added!`, ephemeral: true });
+      await interaction.editReply({ content: `✅ Task **"${title}"** added!` });
+    }
+  },
+
+  // /setup — creates #tasks channel and posts live boards
+  setup: {
+    data: {
+      name: 'setup',
+      description: '🔧 Create the #tasks channel and post the live task boards',
+    },
+    async execute(interaction) {
+      await interaction.deferReply({ ephemeral: true });
+      const guildId = interaction.guild.id;
+      const guildData = taskManager.getGuildTasks(guildId);
+      const settings = taskManager.getGuildSettings(guildId);
+
+      // Find or create #tasks channel
+      let tasksChannel = interaction.guild.channels.cache.find(
+        ch => ch.name === 'tasks' && ch.isTextBased()
+      );
+      if (!tasksChannel) {
+        tasksChannel = await interaction.guild.channels.create({
+          name: 'tasks',
+          type: 0,
+          topic: '📋 Live task board — managed by TaskBot',
+        });
+      }
+
+      // Delete old boards if they exist
+      if (guildData.listMessageId && guildData.listChannelId) {
+        try {
+          const oldCh = await interaction.guild.channels.fetch(guildData.listChannelId);
+          const oldMsg = await oldCh.messages.fetch(guildData.listMessageId);
+          await oldMsg.delete();
+        } catch {}
+      }
+      if (guildData.doneMessageId && guildData.doneChannelId) {
+        try {
+          const oldCh = await interaction.guild.channels.fetch(guildData.doneChannelId);
+          const oldMsg = await oldCh.messages.fetch(guildData.doneMessageId);
+          await oldMsg.delete();
+        } catch {}
+      }
+
+      // Post done board, then main board
+      const doneEmbed = buildDoneEmbed(guildData.tasks || [], settings);
+      const doneMsg = await tasksChannel.send({ embeds: [doneEmbed] });
+      await doneMsg.pin().catch(() => {});
+      taskManager.setDoneMessage(guildId, doneMsg.id, tasksChannel.id);
+
+      const { embeds, components } = buildTaskListEmbed(guildData, settings);
+      const mainMsg = await tasksChannel.send({ embeds, components });
+      await mainMsg.pin().catch(() => {});
+      taskManager.setListMessage(guildId, mainMsg.id, tasksChannel.id);
+
+      await interaction.editReply({
+        content: `✅ TaskBot is set up in ${tasksChannel}! The task boards are live and pinned.`,
+      });
     }
   },
 

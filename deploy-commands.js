@@ -20,6 +20,10 @@ async function deployCommands(client) {
     {
       name: 'settings',
       description: '⚙️ Configure timezone, working hours & reminders',
+    },
+    {
+      name: 'setup',
+      description: '🔧 Create the #tasks channel and post the live task boards',
     }
   ];
 
