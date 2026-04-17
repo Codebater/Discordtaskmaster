@@ -27,12 +27,18 @@ client.once('ready', async () => {
 
 client.on('interactionCreate', async (interaction) => {
   try {
-    // All commands require a server — block DM usage to prevent guild null errors
+    // Block DM usage
     if (!interaction.guildId) {
       if (interaction.isRepliable()) {
         await interaction.reply({ content: '❌ This bot only works inside a server, not in DMs.', ephemeral: true });
       }
       return;
+    }
+
+    // Guild object can be null on cold start (race condition before cache populates).
+    // Fetching it ensures interaction.guild is available for all handlers.
+    if (!interaction.guild) {
+      await interaction.client.guilds.fetch(interaction.guildId);
     }
 
     if (interaction.isChatInputCommand()) {
