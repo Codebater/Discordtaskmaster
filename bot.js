@@ -55,6 +55,8 @@ client.on('interactionCreate', async (interaction) => {
       await handleModal(interaction);
     } else if (interaction.isStringSelectMenu()) {
       await handleSelect(interaction);
+    } else if (interaction.isUserSelectMenu()) {
+      await handleUserSelect(interaction);
     }
   } catch (err) {
     console.error('[interaction error]', interaction.commandName || interaction.customId, err);
@@ -94,6 +96,16 @@ async function handleSelect(interaction) {
     await handlers[action](interaction, params);
   } else {
     await interaction.reply({ content: '❌ Unknown select action.', ephemeral: true });
+  }
+}
+
+async function handleUserSelect(interaction) {
+  const [action, ...params] = interaction.customId.split(':');
+  const handlers = require('./selectHandlers');
+  if (handlers[action]) {
+    await handlers[action](interaction, params);
+  } else {
+    await interaction.reply({ content: '❌ Unknown selection.', ephemeral: true });
   }
 }
 

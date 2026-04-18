@@ -8,6 +8,11 @@ async function deployCommands(client) {
       dm_permission: false,
     },
     {
+      name: 'donate',
+      description: '☕ Support the bot development',
+      dm_permission: false,
+    },
+    {
       name: 'tasklist',
       description: '📋 Post the live task board in this channel',
       dm_permission: false,

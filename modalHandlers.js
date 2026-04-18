@@ -34,17 +34,16 @@ const handlers = {
   },
 
   editTaskModal: async (interaction, [taskId]) => {
-    const title = interaction.fields.getTextInputValue('title').trim();
+    const title       = interaction.fields.getTextInputValue('title').trim();
     const description = interaction.fields.getTextInputValue('description').trim();
-    const assigneeStr = interaction.fields.getTextInputValue('assignees');
     const deadlineStr = interaction.fields.getTextInputValue('deadline');
     const reminderStr = interaction.fields.getTextInputValue('reminder').toLowerCase();
 
-    const assignees = parseMentions(assigneeStr);
     const deadline = parseDeadline(deadlineStr);
     const reminder = reminderStr === 'yes' || reminderStr === 'y' || reminderStr === '1';
 
-    taskManager.updateTask(interaction.guild.id, taskId, { title, description, assignees, deadline, reminder });
+    // Assignees are managed via the 👥 Assign button — don't overwrite them here
+    taskManager.updateTask(interaction.guild.id, taskId, { title, description, deadline, reminder });
     await updateListMessage(interaction.guild);
     await interaction.reply({ content: `✏️ Task **"${title}"** updated!`, ephemeral: true });
   },

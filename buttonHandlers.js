@@ -88,9 +88,6 @@ const handlers = {
           new TextInputBuilder().setCustomId('description').setLabel('Description').setStyle(TextInputStyle.Paragraph).setRequired(false).setValue(task.description || '')
         ),
         new ActionRowBuilder().addComponents(
-          new TextInputBuilder().setCustomId('assignees').setLabel('Assign to (user IDs, comma separated)').setStyle(TextInputStyle.Short).setRequired(false).setValue((task.assignees || []).join(','))
-        ),
-        new ActionRowBuilder().addComponents(
           new TextInputBuilder().setCustomId('deadline').setLabel('Deadline (YYYY-MM-DD HH:MM)').setStyle(TextInputStyle.Short).setRequired(false).setValue(task.deadline ? task.deadline.slice(0, 16).replace('T', ' ') : '')
         ),
         new ActionRowBuilder().addComponents(
@@ -111,6 +108,36 @@ const handlers = {
       const select = taskPicker(open, 'delete', 'Select a task to delete…');
       const row = new ActionRowBuilder().addComponents(select);
       await interaction.reply({ content: '🗑️ Which task do you want to delete?', components: [row], ephemeral: true });
+    }
+  },
+
+  // ─── View Task ────────────────────────────────────────────────────────────
+  viewTask: async (interaction, [sub]) => {
+    if (sub === 'pick') {
+      const { tasks } = taskManager.getGuildTasks(interaction.guild.id);
+      if (!tasks.length) return interaction.reply({ content: 'No tasks yet!', ephemeral: true });
+      const options = tasks.slice(0, 25).map(t =>
+        new StringSelectMenuOptionBuilder()
+          .setLabel(`${t.done ? '✅' : '📋'} ${t.title.slice(0, 75)}`)
+          .setValue(`view:${t.id}`)
+          .setDescription(t.done ? 'Completed' : (t.deadline ? `Due: ${t.deadline.slice(0, 10)}` : 'No deadline'))
+      );
+      const select = new StringSelectMenuBuilder()
+        .setCustomId('taskSelect:view')
+        .setPlaceholder('Select a task to view…')
+        .addOptions(options);
+      await interaction.reply({ content: '👁️ Which task do you want to view?', components: [new ActionRowBuilder().addComponents(select)], ephemeral: true });
+    }
+  },
+
+  // ─── Assign Task ──────────────────────────────────────────────────────────
+  assignTask: async (interaction, [sub]) => {
+    if (sub === 'pick') {
+      const { tasks } = taskManager.getGuildTasks(interaction.guild.id);
+      const open = tasks.filter(t => !t.done);
+      if (!open.length) return interaction.reply({ content: 'No open tasks to assign!', ephemeral: true });
+      const select = taskPicker(open, 'assign', 'Select a task to assign members…');
+      await interaction.reply({ content: '👥 Which task do you want to assign?', components: [new ActionRowBuilder().addComponents(select)], ephemeral: true });
     }
   },
 

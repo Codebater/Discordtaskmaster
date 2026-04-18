@@ -138,6 +138,23 @@ const commands = {
     }
   },
 
+  // /donate
+  donate: {
+    data: { name: 'donate', description: '☕ Support the bot development' },
+    async execute(interaction) {
+      const embed = new EmbedBuilder()
+        .setTitle('☕ Support TaskBot')
+        .setColor(0xFF5E5B)
+        .setDescription(
+          'TaskBot is free to use! If it helps your team stay organised, consider buying the developer a coffee.\n\n' +
+          '**[☕ Donate on Ko-fi](https://ko-fi.com/YOUR_KOFI_NAME)**\n\n' +
+          'Every donation helps keep the bot running and improving. Thank you! 🙏'
+        )
+        .setFooter({ text: 'No amount is too small — it all helps!' });
+      await interaction.reply({ embeds: [embed] });
+    }
+  },
+
   // /settings
   settings: {
     data: {

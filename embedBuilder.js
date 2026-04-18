@@ -80,11 +80,11 @@ function buildTaskListEmbed(guildData, guildSettings) {
     .setTitle('✨ Task Board')
     .setColor(color)
     .setTimestamp()
-    .setFooter({ text: `${open.length} open · ${done.length} completed · updated` });
+    .setFooter({ text: `${open.length} open · ${done.length} completed · updated · /donate to support` });
 
   if (total === 0) {
     embed.setDescription('> No tasks yet. Click **➕ Add Task** to get started!');
-    return { embeds: [embed], components: buildListButtons() };
+    return { embeds: [embed], components: buildListButtons([], []) };
   }
 
   // ── Progress bar at the top ──
@@ -119,11 +119,11 @@ function buildTaskListEmbed(guildData, guildSettings) {
     embed.addFields({ name: `✅ Recently completed`, value: lines.join('\n'), inline: false });
   }
 
-  return { embeds: [embed], components: buildListButtons(open) };
+  return { embeds: [embed], components: buildListButtons(open, tasks) };
 }
 
 // ─── Buttons ───────────────────────────────────────────────────────────────────
-function buildListButtons(openTasks = []) {
+function buildListButtons(openTasks = [], allTasks = []) {
   const row1 = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('addTask:new')
@@ -149,7 +149,19 @@ function buildListButtons(openTasks = []) {
       .setLabel('⚙️ Settings')
       .setStyle(ButtonStyle.Secondary),
   );
-  return [row1];
+  const row2 = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('viewTask:pick')
+      .setLabel('👁️ View')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(allTasks.length === 0),
+    new ButtonBuilder()
+      .setCustomId('assignTask:pick')
+      .setLabel('👥 Assign')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(openTasks.length === 0),
+  );
+  return [row1, row2];
 }
 
 function buildTaskDetailEmbed(task) {
